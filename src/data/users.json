@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "username": "john_doe",
+      "password": "1234",
+      "group": "Group A",
+      "role": "field_agent",
+      "hotels": [
+        {
+          "name": "Terrace Hotel",
+          "lat": 40.7589,
+          "lng": -73.9851,
+          "completed": false
+        },
+        {
+          "name": "Sunrise Inn",
+          "lat": 40.7505,
+          "lng": -73.9934,
+          "completed": false
+        },
+        {
+          "name": "Blue Wave Hotel",
+          "lat": 40.7614,
+          "lng": -73.9776,
+          "completed": false
+        }
+      ]
+    },
+    {
+      "username": "jane_smith",
+      "password": "5678",
+      "group": "Group B",
+      "role": "field_agent",
+      "hotels": [
+        {
+          "name": "Golden Gate Resort",
+          "lat": 40.7282,
+          "lng": -74.0776,
+          "completed": false
+        },
+        {
+          "name": "Mountain View Lodge",
+          "lat": 40.7831,
+          "lng": -73.9712,
+          "completed": false
+        }
+      ]
+    },
+    {
+      "username": "admin",
+      "password": "admin123",
+      "group": "Administration",
+      "role": "admin",
+      "hotels": []
+    }
+  ]
+}

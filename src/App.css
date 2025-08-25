@@ -36,3 +36,41 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom styles for the hotel survey app */
+.leaflet-container {
+  border-radius: 8px;
+}
+
+/* Login screen specific styles */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Hotel card hover effects */
+.hotel-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.hotel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Map popup styles */
+.leaflet-popup-content {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .MuiContainer-root {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
