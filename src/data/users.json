@@ -48,7 +48,7 @@
     },
     {
       "username": "admin",
-      "password": "admin123",
+      "password": "abc",
       "group": "Administration",
       "role": "admin",
       "hotels": []

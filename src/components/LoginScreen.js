@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { LockOutlined } from '@mui/icons-material';
 import { loginUser, clearError } from '../store/authSlice';
+import { authAPI } from '../services/api';
 
 const LoginScreen = () => {
   const navigate = useNavigate();
@@ -65,17 +66,73 @@ const LoginScreen = () => {
     
     console.log('Attempting login with:', { username: formData.username });
     
+    // Handle admin login
+    if (formData.username === 'admin' && formData.password === 'abc') {
+      console.log('Admin login detected');
+      
+      // Create admin user object
+      const adminUser = {
+        username: 'admin',
+        password: 'abc',
+        role: 'admin',
+        group: 'Administration',
+        hotels: [],
+        permissions: [
+          'view_all_surveys',
+          'export_data',
+          'manage_users',
+          'system_admin'
+        ],
+        lastLogin: new Date().toISOString()
+      };
+      
+      // Store admin user data
+      localStorage.setItem('hotelSurveyUser', JSON.stringify(adminUser));
+      localStorage.setItem('auth_token', `admin_token_${Date.now()}`);
+      
+      // Update Redux state
+      dispatch(loginUser(formData));
+      
+      console.log('Admin user logged in:', adminUser);
+      console.log('Redirecting to admin panel');
+      navigate('/admin');
+      return;
+    }
+    
+    // Regular user login flow
     try {
-      const result = await dispatch(loginUser(formData)).unwrap();
-      console.log('Login successful:', result);
+      const response = await authAPI.login(formData);
+      console.log('API response received:', response);
       
-      // Force immediate navigation on successful login
-      console.log('Login successful, forcing navigation to /home');
-      navigate('/home');
-      
+      // If we get any response (200 status), redirect immediately
+      if (response) {
+        console.log('Login successful - redirecting based on user role');
+        console.log('User role:', response.user?.role);
+        
+        // Determine if response has user object or is the user object itself
+        const userData = response.user || response;
+        
+        // Store user data for the app
+        localStorage.setItem('hotelSurveyUser', JSON.stringify(userData));
+        if (response.token) {
+          localStorage.setItem('auth_token', response.token);
+        }
+        
+        // Update Redux state
+        dispatch(loginUser(formData));
+        
+        // Redirect based on user role
+        if (userData.role === 'admin') {
+          console.log('Admin user detected - redirecting to admin panel');
+          navigate('/admin');
+        } else {
+          console.log('Regular user - redirecting to home page');
+          navigate('/home');
+        }
+      }
     } catch (err) {
       console.error('Login failed:', err);
-      // Error is handled by Redux, no need to set local error state
+      dispatch(clearError());
     }
   };
 
@@ -150,21 +207,6 @@ const LoginScreen = () => {
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
-            </Box>
-
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Typography variant="body2" color="textSecondary">
-                Demo Credentials:
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                <strong>Field Agent:</strong> john_doe | 1234
-              </Typography>
-              <Typography variant="body2">
-                <strong>Field Agent:</strong> jane_smith | 5678
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'primary.main' }}>
-                <strong>Admin:</strong> admin | admin123
-              </Typography>
             </Box>
           </Box>
         </Paper>

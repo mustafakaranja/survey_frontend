@@ -13,10 +13,14 @@ export const loginUser = createAsyncThunk(
       // If we get any response (API call was successful), process it
       if (response) {
         console.log('Redux: API call successful, processing response...');
+        console.log('Redux: Response hotels:', response.hotels);
         
         // Extract user data - handle both formats
         const userData = response.user || response;
         const token = response.token;
+        
+        console.log('Redux: Extracted user data:', userData);
+        console.log('Redux: User hotels:', userData.hotels);
         
         // Store token if provided
         if (token) {

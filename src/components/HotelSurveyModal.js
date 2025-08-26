@@ -110,18 +110,37 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
     setError('');
 
     try {
+      console.log('Survey form data being submitted:', formData);
+      console.log('Hotel object:', hotel);
+      
+      // Ensure hotel name is set (use hotel.name as fallback)
+      const surveyData = {
+        ...formData,
+        hotelName: formData.hotelName || hotel?.name || ''
+      };
+      
+      console.log('Final survey data:', surveyData);
+
       // Validate required fields
-      if (!formData.hotelName || !formData.numberOfRooms || !formData.ownerName || 
-          !formData.phoneNumber || !formData.address) {
-        throw new Error('Please fill in all required fields');
+      if (!surveyData.hotelName || !surveyData.numberOfRooms || !surveyData.ownerName || 
+          !surveyData.phoneNumber || !surveyData.address) {
+        console.log('Validation failed. Missing fields:');
+        console.log('Hotel Name:', surveyData.hotelName);
+        console.log('Number of Rooms:', surveyData.numberOfRooms);
+        console.log('Owner Name:', surveyData.ownerName);
+        console.log('Phone Number:', surveyData.phoneNumber);
+        console.log('Address:', surveyData.address);
+        throw new Error('Please fill in all required fields: Hotel Name, Number of Rooms, Owner Name, Phone Number, and Address');
       }
 
       // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      onSubmit(hotel.name, formData);
+      console.log('Calling onSubmit with:', hotel.name, surveyData);
+      onSubmit(hotel.name, surveyData);
       onClose();
     } catch (error) {
+      console.error('Survey submission error:', error);
       setError(error.message || 'Error submitting survey');
     } finally {
       setLoading(false);
