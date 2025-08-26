@@ -5,6 +5,9 @@ const BASE_URL = process.env.NODE_ENV === 'production'
   ? 'https://surveybackend-production-8dbc.up.railway.app'
   : 'http://localhost:5001';
 
+console.log('Environment:', process.env.NODE_ENV);
+console.log('API Base URL:', BASE_URL);
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: BASE_URL,
@@ -149,6 +152,11 @@ export const handleAPIError = (error) => {
   
   if (error.response?.status >= 500) {
     return 'Server error. Please try again later.';
+  }
+  
+  // Handle CORS errors
+  if (error.message?.includes('CORS') || error.code === 'ERR_NETWORK') {
+    return 'CORS error: Backend server needs to allow requests from this domain. Please check backend CORS configuration.';
   }
   
   return error.message || 'An unexpected error occurred.';
