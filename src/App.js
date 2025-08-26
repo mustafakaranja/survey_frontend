@@ -190,11 +190,6 @@ function AppRouter() {
   return (
     <Router>
       <div className="App">
-        {/* Debug info */}
-        <div style={{ position: 'fixed', top: 0, left: 0, background: 'rgba(0,0,0,0.8)', color: 'white', padding: '5px', fontSize: '12px', zIndex: 9999 }}>
-          Auth: {isAuthenticated ? 'Yes' : 'No'} | User: {user?.username || 'None'}
-        </div>
-        
         <Routes>
           <Route 
             path="/login" 

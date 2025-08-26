@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Base URL for the API - update this if backend runs on different port
-const BASE_URL = 'http://localhost:5001';
+// Base URL for the API - automatically detects environment
+const BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://surveybackend-production-8dbc.up.railway.app'
+  : 'http://localhost:5001';
 
 // Create axios instance with default config
 const api = axios.create({
