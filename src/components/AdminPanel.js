@@ -1,54 +1,73 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { testGetAllSurveys } from '../testAPI';
 import {
-  Container,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Button,
-  CircularProgress,
-  Alert,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Drawer,
-  IconButton,
-  Divider,
-  Stack,
-  TablePagination,
-  Tooltip,
-  Avatar
-} from '@mui/material';
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonItem,
+  IonLabel,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonSearchbar,
+  IonSelect,
+  IonSelectOption,
+  IonInput,
+  IonCheckbox,
+  IonSpinner,
+  IonAlert,
+  IonRefresher,
+  IonRefresherContent,
+  IonModal,
+  IonIcon,
+  IonBadge,
+  IonText,
+  IonNote,
+  IonChip,
+  IonList,
+  IonItemDivider,
+  IonPopover,
+  IonToggle,
+  IonSegment,
+  IonSegmentButton,
+  IonButtons,
+  IonBackButton,
+  IonMenuButton,
+  IonProgressBar,
+  IonSkeletonText,
+  IonToast,
+  IonAccordion,
+  IonAccordionGroup
+} from '@ionic/react';
 import {
-  Search,
-  FilterList,
-  Refresh,
-  Download,
-  Assessment,
-  Hotel,
-  Close,
-  Star,
-  LocationOn,
-  AcUnit,
-  Phone,
-  Person,
-  CalendarToday,
-  Clear,
-  BusinessCenter
-} from '@mui/icons-material';
+  search,
+  funnel,
+  refresh,
+  download,
+  analytics,
+  business,
+  close,
+  star,
+  location,
+  snow,
+  call,
+  person,
+  calendar,
+  clearOutline,
+  briefcase,
+  mail,
+  chatbox,
+  bed,
+  restaurant,
+  checkmark,
+  closeOutline
+} from 'ionicons/icons';
 import { surveyAPI, handleAPIError } from '../services/api';
 
 const AdminPanel = () => {
@@ -60,47 +79,54 @@ const AdminPanel = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   
-  // Filter states
+  // Filter states for new survey schema
   const [filters, setFilters] = useState({
     search: '',
-    starRating: '',
-    acAvailable: '',
+    acNonAc: '',
+    dormitory: '',
+    breakfast: '',
     roomsMin: '',
     roomsMax: '',
     location: ''
   });
 
-  // Define applyFilters before useEffect that uses it
+  // Define applyFilters for new survey schema
   const applyFilters = useCallback(() => {
     let filtered = surveys;
 
-    // Search filter (hotel name, owner name, address)
+    // Search filter (hotel name, manager email, address)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(survey => 
         survey.hotelName.toLowerCase().includes(searchLower) ||
-        survey.ownerName.toLowerCase().includes(searchLower) ||
+        survey.managerEmail.toLowerCase().includes(searchLower) ||
         survey.address.toLowerCase().includes(searchLower)
       );
     }
 
-    // Star rating filter
-    if (filters.starRating) {
-      filtered = filtered.filter(survey => survey.starRating === parseInt(filters.starRating));
+    // AC/Non-AC filter
+    if (filters.acNonAc) {
+      filtered = filtered.filter(survey => survey.acNonAc === filters.acNonAc);
     }
 
-    // AC availability filter
-    if (filters.acAvailable !== '') {
-      const acFilter = filters.acAvailable === 'true';
-      filtered = filtered.filter(survey => survey.acRoomsAvailable === acFilter);
+    // Dormitory filter
+    if (filters.dormitory !== '') {
+      const dormitoryFilter = filters.dormitory === 'true';
+      filtered = filtered.filter(survey => survey.dormitory === dormitoryFilter);
+    }
+
+    // Breakfast filter
+    if (filters.breakfast !== '') {
+      const breakfastFilter = filters.breakfast === 'true';
+      filtered = filtered.filter(survey => survey.breakfast === breakfastFilter);
     }
 
     // Rooms count filter
     if (filters.roomsMin) {
-      filtered = filtered.filter(survey => survey.numberOfRooms >= parseInt(filters.roomsMin));
+      filtered = filtered.filter(survey => survey.numberOfRoomsInHotel >= parseInt(filters.roomsMin));
     }
     if (filters.roomsMax) {
-      filtered = filtered.filter(survey => survey.numberOfRooms <= parseInt(filters.roomsMax));
+      filtered = filtered.filter(survey => survey.numberOfRoomsInHotel <= parseInt(filters.roomsMax));
     }
 
     // Location filter
@@ -148,22 +174,25 @@ const AdminPanel = () => {
       
       console.log('Surveys data:', surveysData);
       
-      // Transform the data to match expected format
+      // Transform the data to match new survey schema
       const transformedSurveys = surveysData.map((survey, index) => {
         console.log(`Transforming survey ${index}:`, survey);
         
         return {
           _id: survey._id || survey.id || `survey_${index}`,
           username: survey.username || survey.surveyedBy || 'Unknown',
-          hotelName: survey.hotelName || survey.hotel_name || 'Unknown Hotel',
-          numberOfRooms: survey.surveyData?.numberOfRooms || survey.numberOfRooms || survey.rooms || 0,
-          availableDates: survey.surveyData?.availableDates || survey.availableDates || survey.available_dates || 'N/A',
-          ownerName: survey.surveyData?.ownerName || survey.ownerName || survey.owner_name || 'N/A',
-          phoneNumber: survey.surveyData?.phoneNumber || survey.phoneNumber || survey.phone_number || 'N/A',
-          alternateNumber: survey.surveyData?.alternateNumber || survey.alternateNumber || survey.alternate_number || 'N/A',
+          hotelName: survey.surveyData?.hotelName || survey.hotelName || survey.hotel_name || 'Unknown Hotel',
           address: survey.surveyData?.address || survey.address || 'N/A',
-          acRoomsAvailable: survey.surveyData?.acRoomsAvailable === 'yes' || survey.acRoomsAvailable === 'yes' || survey.ac_available === 'yes' || false,
-          starRating: survey.surveyData?.starRating || survey.starRating || survey.star_rating || 0,
+          managerEmail: survey.surveyData?.managerEmail || survey.managerEmail || 'N/A',
+          managerContactNumber: survey.surveyData?.managerContactNumber || survey.managerContactNumber || 'N/A',
+          whatsappNumber: survey.surveyData?.whatsappNumber || survey.whatsappNumber || 'N/A',
+          acNonAc: survey.surveyData?.acNonAc || survey.acNonAc || 'N/A',
+          dormitory: survey.surveyData?.dormitory || survey.dormitory || false,
+          numberOfRoomsInHotel: survey.surveyData?.numberOfRoomsInHotel || survey.numberOfRoomsInHotel || survey.numberOfRooms || 0,
+          roomTariff: survey.surveyData?.roomTariff || survey.roomTariff || 'N/A',
+          breakfast: survey.surveyData?.breakfast || survey.breakfast || false,
+          numberOfRoomsOfferedDuringAdshsra: survey.surveyData?.numberOfRoomsOfferedDuringAdshsra || survey.numberOfRoomsOfferedDuringAdshsra || 'N/A',
+          comments: survey.surveyData?.comments || survey.comments || 'N/A',
           createdAt: survey.submittedAt || survey.createdAt || survey.created_at || new Date().toISOString(),
           updatedAt: survey.submittedAt || survey.updatedAt || survey.updated_at || new Date().toISOString()
         };
@@ -187,8 +216,9 @@ const AdminPanel = () => {
   const clearFilters = () => {
     setFilters({
       search: '',
-      starRating: '',
-      acAvailable: '',
+      acNonAc: '',
+      dormitory: '',
+      breakfast: '',
       roomsMin: '',
       roomsMax: '',
       location: ''
@@ -226,12 +256,11 @@ const AdminPanel = () => {
     setPage(0);
   };
 
-  // Calculate statistics
+  // Calculate statistics for new survey schema
   const totalSurveys = surveys.length;
-  const avgRating = surveys.length > 0 ? 
-    (surveys.reduce((sum, s) => sum + s.starRating, 0) / surveys.length).toFixed(1) : 0;
-  const acHotels = surveys.filter(s => s.acRoomsAvailable).length;
-  const totalRooms = surveys.reduce((sum, s) => sum + parseInt(s.numberOfRooms || 0), 0);
+  const acHotels = surveys.filter(s => s.acNonAc === 'AC').length;
+  const dormitoryHotels = surveys.filter(s => s.dormitory === true).length;
+  const totalRooms = surveys.reduce((sum, s) => sum + parseInt(s.numberOfRoomsInHotel || 0), 0);
 
   if (loading) {
     return (

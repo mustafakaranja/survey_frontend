@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hotel Survey App</string>
+    <string name="title_activity_main">Hotel Survey App</string>
+    <string name="package_name">com.hotel.survey</string>
+    <string name="custom_url_scheme">com.hotel.survey</string>
+</resources>

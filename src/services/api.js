@@ -67,6 +67,16 @@ export const authAPI = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to get user details');
     }
+  },
+
+  // Add hotel for user
+  addHotel: async (hotelData) => {
+    try {
+      const response = await api.post('/api/user/addHotel', hotelData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to add hotel');
+    }
   }
 };
 
@@ -120,6 +130,16 @@ export const surveyAPI = {
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to get statistics');
+    }
+  },
+
+  // Delete survey by ID
+  deleteSurvey: async (surveyId) => {
+    try {
+      const response = await api.delete(`/api/survey/${surveyId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to delete survey');
     }
   }
 };

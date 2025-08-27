@@ -38,8 +38,16 @@
 }
 
 /* Custom styles for the hotel survey app */
-.leaflet-container {
-  border-radius: 8px;
+
+/* Global background image for the app */
+.app-background {
+  background: url(bg.png) repeat center center fixed #61a0b1;
+  min-height: 100vh;
+}
+
+/* Override for IonApp to have background */
+ion-app {
+  background: url(bg.png) repeat center center fixed #61a0b1;
 }
 
 /* Login screen specific styles */

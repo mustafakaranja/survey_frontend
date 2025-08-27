@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Container,
@@ -9,15 +9,13 @@ import {
   Typography,
   Box,
   Alert,
-  Avatar,
   CircularProgress
 } from '@mui/material';
-import { LockOutlined } from '@mui/icons-material';
 import { loginUser, clearError } from '../store/authSlice';
 import { authAPI } from '../services/api';
 
 const LoginScreen = () => {
-  const navigate = useNavigate();
+  const history = useHistory();
   const dispatch = useDispatch();
   const { loading, error, isAuthenticated, user } = useSelector((state) => {
     console.log('LoginScreen: Current Redux state:', state.auth);
@@ -31,13 +29,13 @@ const LoginScreen = () => {
 
   console.log('LoginScreen: Render state:', { loading, error, isAuthenticated, user: user?.username });
 
-  // Navigate to home if already authenticated
+    // Navigate to home if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User already authenticated, navigating to home');
-      navigate('/home');
+    if (isAuthenticated && user) {
+      console.log('User already authenticated, redirecting...');
+      history.push('/home');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, history, user]);
 
   // Clear error when user starts typing
   useEffect(() => {
@@ -95,7 +93,7 @@ const LoginScreen = () => {
       
       console.log('Admin user logged in:', adminUser);
       console.log('Redirecting to admin panel');
-      navigate('/admin');
+      history.push('/admin');
       return;
     }
     
@@ -124,10 +122,10 @@ const LoginScreen = () => {
         // Redirect based on user role
         if (userData.role === 'admin') {
           console.log('Admin user detected - redirecting to admin panel');
-          navigate('/admin');
+          history.push('/admin');
         } else {
           console.log('Regular user - redirecting to home page');
-          navigate('/home');
+          history.push('/home');
         }
       }
     } catch (err) {
@@ -154,14 +152,23 @@ const LoginScreen = () => {
               alignItems: 'center',
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-              <LockOutlined />
-            </Avatar>
+            <Box sx={{ m: 2, mb: 1 }}>
+              <img 
+                src="/logo_tkm.png" 
+                alt="TKM Logo" 
+                style={{ 
+                  height: '80px', 
+                  width: 'auto',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                }} 
+              />
+            </Box>
             <Typography component="h1" variant="h4" gutterBottom>
               Hotel Survey
             </Typography>
             <Typography component="h2" variant="h6" color="textSecondary" gutterBottom>
-              Field Agent Login
+              Login
             </Typography>
 
             {error && (
