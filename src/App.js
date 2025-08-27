@@ -8,6 +8,7 @@ import { initializeAuth, logout } from './store/authSlice';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import AdminScreen from './components/AdminScreen';
+import SubmittedData from './components/SubmittedData';
 import './App.css';
 
 const theme = createTheme({
@@ -191,6 +192,7 @@ function AppRouter() {
     <Router>
       <div className="App">
         <Routes>
+        <Route path="/submitted-data" element={<SubmittedData />} />
           <Route 
             path="/login" 
             element={

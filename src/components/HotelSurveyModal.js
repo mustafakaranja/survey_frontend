@@ -19,18 +19,9 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import { surveyAPI, handleAPIError } from '../services/api';
+import HotelMap from './HotelMap';
 
-// Fix for default markers in react-leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
 
 const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
   const [formData, setFormData] = useState({
@@ -51,57 +42,36 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
     const loadData = async () => {
       if (hotel) {
         if (isCompleted) {
-          // Try to load existing survey data from API
           try {
             setLoading(true);
             const response = await surveyAPI.getSurveyByHotel(hotel.name);
             if (response.success && response.surveys.length > 0) {
-              // Load the survey data
               const surveyData = response.surveys[0].surveyData;
               setFormData(surveyData);
             } else {
-              // Fallback to hotel name
-              setFormData(prev => ({
-                ...prev,
-                hotelName: hotel.name || ''
-              }));
+              setFormData(prev => ({ ...prev, hotelName: hotel.name || '' }));
             }
           } catch (err) {
             setError(handleAPIError(err));
-            // Fallback to hotel name
-            setFormData(prev => ({
-              ...prev,
-              hotelName: hotel.name || ''
-            }));
+            setFormData(prev => ({ ...prev, hotelName: hotel.name || '' }));
           } finally {
             setLoading(false);
           }
         } else {
-          // Initialize with hotel name
-          setFormData(prev => ({
-            ...prev,
-            hotelName: hotel.name || ''
-          }));
+          setFormData(prev => ({ ...prev, hotelName: hotel.name || '' }));
         }
       }
     };
-
     loadData();
   }, [hotel, isCompleted]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleRatingChange = (event, newValue) => {
-    setFormData(prev => ({
-      ...prev,
-      starRating: newValue
-    }));
+    setFormData(prev => ({ ...prev, starRating: newValue }));
   };
 
   const handleSubmit = async (e) => {
@@ -110,37 +80,21 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
     setError('');
 
     try {
-      console.log('Survey form data being submitted:', formData);
-      console.log('Hotel object:', hotel);
-      
-      // Ensure hotel name is set (use hotel.name as fallback)
       const surveyData = {
         ...formData,
         hotelName: formData.hotelName || hotel?.name || ''
       };
-      
-      console.log('Final survey data:', surveyData);
 
-      // Validate required fields
-      if (!surveyData.hotelName || !surveyData.numberOfRooms || !surveyData.ownerName || 
-          !surveyData.phoneNumber || !surveyData.address) {
-        console.log('Validation failed. Missing fields:');
-        console.log('Hotel Name:', surveyData.hotelName);
-        console.log('Number of Rooms:', surveyData.numberOfRooms);
-        console.log('Owner Name:', surveyData.ownerName);
-        console.log('Phone Number:', surveyData.phoneNumber);
-        console.log('Address:', surveyData.address);
-        throw new Error('Please fill in all required fields: Hotel Name, Number of Rooms, Owner Name, Phone Number, and Address');
+      if (!surveyData.hotelName || !surveyData.numberOfRooms || !surveyData.ownerName ||
+        !surveyData.phoneNumber || !surveyData.address) {
+        throw new Error('Please fill in all required fields.');
       }
 
-      // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log('Calling onSubmit with:', hotel.name, surveyData);
+
       onSubmit(hotel.name, surveyData);
       onClose();
     } catch (error) {
-      console.error('Survey submission error:', error);
       setError(error.message || 'Error submitting survey');
     } finally {
       setLoading(false);
@@ -168,7 +122,7 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
       <DialogTitle>
         {isCompleted ? 'View Survey' : 'Hotel Survey Form'} - {hotel.name}
       </DialogTitle>
-      
+
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -182,29 +136,16 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
           </Box>
         )}
 
-        {/* Map Section */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Hotel Location
-          </Typography>
-          <Box sx={{ height: 300, border: '1px solid #ccc', borderRadius: 1 }}>
-            <MapContainer
-              center={[hotel.lat || 40.7589, hotel.lng || -73.9851]}
-              zoom={15}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <Marker position={[hotel.lat || 40.7589, hotel.lng || -73.9851]}>
-                <Popup>
-                  <strong>{hotel.name}</strong>
-                </Popup>
-              </Marker>
-            </MapContainer>
-          </Box>
-        </Box>
+        {/* Google Maps Section */}
+   <Box sx={{ mb: 3 }}>
+  <Typography variant="h6" gutterBottom>
+    Hotel Location
+  </Typography>
+{hotel?.name ? <HotelMap hotelName={hotel.name} /> : (
+  <Alert severity="warning">Hotel name not available to show location.</Alert>
+)}
+
+</Box>
 
         <Divider sx={{ mb: 3 }} />
 
@@ -225,7 +166,7 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
                 onChange={handleChange}
                 fullWidth
                 required
-                disabled={true} // Auto-populated
+                disabled={true}
               />
             </Grid>
 
@@ -343,9 +284,9 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
             <Button onClick={handleReset} color="secondary">
               Reset
             </Button>
-            <Button 
-              onClick={handleSubmit} 
-              variant="contained" 
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
               disabled={loading}
               type="submit"
             >
