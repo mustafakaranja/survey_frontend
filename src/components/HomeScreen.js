@@ -35,6 +35,8 @@ const HomeScreen = ({ user, onLogout }) => {
   const [userHotels, setUserHotels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [submittedHotels, setSubmittedHotels] = useState([]);
+
 
   const isAdmin = user?.role === 'admin';
 
@@ -66,6 +68,27 @@ const HomeScreen = ({ user, onLogout }) => {
       setUserHotels(transformedHotels);
     }
   }, [user]);
+
+  useEffect(() => {
+  const fetchSubmittedHotels = async () => {
+    try {
+      const response = await fetch('https://surveybackend-production-8dbc.up.railway.app/api/surveys');
+      const result = await response.json();
+
+      if (result.status === 'success' && Array.isArray(result.data)) {
+        const userSubmitted = result.data
+          .filter(item => item.username === user?.username)
+          .map(item => item.hotelName);
+        setSubmittedHotels(userSubmitted);
+      }
+    } catch (err) {
+      console.error('Error fetching submitted hotels:', err);
+    }
+  };
+
+  if (user?.username) fetchSubmittedHotels();
+}, [user]);
+
 
   const handleHotelClick = (hotel) => {
     setSelectedHotel(hotel);
@@ -123,8 +146,10 @@ const HomeScreen = ({ user, onLogout }) => {
   };
 
   const totalHotels = userHotels.length;
-  const completedHotels = userHotels.filter(h => h.completed).length;
-  const pendingHotels = totalHotels - completedHotels;
+const completedHotels = submittedHotels.filter(hotelName =>
+  userHotels.some(hotel => hotel.name === hotelName)
+).length;
+const pendingHotels = totalHotels - completedHotels;
 
   return (
     <>
@@ -139,6 +164,28 @@ const HomeScreen = ({ user, onLogout }) => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, color: 'white', fontWeight: 600 }}>
             Hotel Survey Dashboard
           </Typography>
+
+             {/* Show Submitted Data button only for normal users */}
+    {!isAdmin && (
+      
+      <Button
+        variant="outlined"
+        onClick={() => navigate('/submitted-data')}
+        sx={{
+          color: 'white',
+          borderColor: 'rgba(255, 255, 255, 0.3)',
+          mr: 2,
+          '&:hover': {
+            borderColor: 'white',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          },
+        }}
+      >
+        Submitted Data
+      </Button>
+
+      
+    )}
           
           {/* Admin Button - Only show if user role is admin */}
           {isAdmin && (
@@ -175,7 +222,7 @@ const HomeScreen = ({ user, onLogout }) => {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="xl" sx={{ mt: 2, mb: 4, px: 3 }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}>
         {error && (
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setError('')}>
             {error}
@@ -218,7 +265,7 @@ const HomeScreen = ({ user, onLogout }) => {
                           }}
                         />
                         <Chip 
-                          label={`Role: ${user?.role || 'User'}`} 
+                          label={`Role: ${user?.role || 'Member'}`} 
                           sx={{ 
                             bgcolor: isAdmin ? 'rgba(255, 193, 7, 0.3)' : 'rgba(255, 255, 255, 0.2)', 
                             color: isAdmin ? '#fff176' : 'white',
@@ -245,8 +292,8 @@ const HomeScreen = ({ user, onLogout }) => {
             </Card>
 
             {/* KPIs Section - Minimalistic Style */}
-                <Grid container spacing={3} sx={{ mb: 4 }}>
-                  <Grid item xs={12} sm={6} lg={3}>
+                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 2, sm: 4 } }}>
+                 <Grid item xs={12} sm={6} md={4} lg={3}>
                     <Card sx={{ 
                       background: 'linear-gradient(195deg, #42424a, #191919)',
                       color: 'white',
@@ -264,11 +311,11 @@ const HomeScreen = ({ user, onLogout }) => {
                           }}>
                             Total Hotels
                           </Typography>
-                          <Typography variant="h3" sx={{ 
-                            color: 'white', 
-                            fontWeight: 700, 
-                            mb: 1,
-                          }}>
+                      <Typography 
+  variant="h3" 
+  sx={{ color: 'white', fontWeight: 700, mb: 1, fontSize: { xs: '1.8rem', sm: '2.2rem' } }}
+>
+
                             {totalHotels}
                           </Typography>
                           <Typography variant="body2" sx={{ 
@@ -297,7 +344,8 @@ const HomeScreen = ({ user, onLogout }) => {
                     </Card>
                   </Grid>
                   
-                  <Grid item xs={12} sm={6} lg={3}>
+                 <Grid item xs={12} sm={6} md={4} lg={3}>
+
                     <Card sx={{ 
                       background: 'linear-gradient(195deg, #42424a, #191919)',
                       color: 'white',
@@ -315,11 +363,11 @@ const HomeScreen = ({ user, onLogout }) => {
                           }}>
                             Completed
                           </Typography>
-                          <Typography variant="h3" sx={{ 
-                            color: 'white', 
-                            fontWeight: 700, 
-                            mb: 1,
-                          }}>
+                       <Typography 
+  variant="h3" 
+  sx={{ color: 'white', fontWeight: 700, mb: 1, fontSize: { xs: '1.8rem', sm: '2.2rem' } }}
+>
+
                             {completedHotels}
                           </Typography>
                           <Typography variant="body2" sx={{ 
@@ -348,7 +396,8 @@ const HomeScreen = ({ user, onLogout }) => {
                     </Card>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} lg={3}>
+                 <Grid item xs={12} sm={6} md={4} lg={3}>
+
                     <Card sx={{ 
                       background: 'linear-gradient(195deg, #42424a, #191919)',
                       color: 'white',
@@ -366,11 +415,11 @@ const HomeScreen = ({ user, onLogout }) => {
                           }}>
                             Pending
                           </Typography>
-                          <Typography variant="h3" sx={{ 
-                            color: 'white', 
-                            fontWeight: 700, 
-                            mb: 1,
-                          }}>
+                       <Typography 
+  variant="h3" 
+  sx={{ color: 'white', fontWeight: 700, mb: 1, fontSize: { xs: '1.8rem', sm: '2.2rem' } }}
+>
+
                             {pendingHotels}
                           </Typography>
                           <Typography variant="body2" sx={{ 
@@ -399,7 +448,8 @@ const HomeScreen = ({ user, onLogout }) => {
                     </Card>
                   </Grid>
 
-                  <Grid item xs={12} sm={6} lg={3}>
+                 <Grid item xs={12} sm={6} md={4} lg={3}>
+
                     <Card sx={{ 
                       background: 'linear-gradient(195deg, #42424a, #191919)',
                       color: 'white',
@@ -417,11 +467,11 @@ const HomeScreen = ({ user, onLogout }) => {
                           }}>
                             Progress
                           </Typography>
-                          <Typography variant="h3" sx={{ 
-                            color: 'white', 
-                            fontWeight: 700, 
-                            mb: 1,
-                          }}>
+                        <Typography 
+                        variant="h3" 
+                         sx={{ color: 'white', fontWeight: 700, mb: 1, fontSize: { xs: '1.8rem', sm: '2.2rem' } }}
+                 >
+
                             {Math.round((completedHotels / totalHotels) * 100) || 0}%
                           </Typography>
                           <Typography variant="body2" sx={{ 
@@ -461,112 +511,103 @@ const HomeScreen = ({ user, onLogout }) => {
                   </Typography>
                 </Box>
                 
-                <Grid container spacing={3}>
-                  {userHotels.map((hotel, index) => (
-                    <Grid item xs={12} sm={6} lg={4} key={index}>
-                      <Card 
-                        sx={{ 
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          borderRadius: 2,
-                          border: hotel.completed ? '1px solid #4caf50' : '1px solid #e0e0e0',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            boxShadow: '0rem 0.25rem 1rem rgba(0, 0, 0, 0.1)',
-                          }
-                        }}
-                      >
-                        <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="h6" component="h2" sx={{ 
-                                color: '#344767', 
-                                fontWeight: 600,
-                                mb: 1,
-                              }}>
-                                {hotel.name}
-                              </Typography>
-                              <Typography variant="body2" sx={{ 
-                                color: hotel.completed ? '#4caf50' : '#67748e',
-                                fontWeight: 500,
-                                fontSize: '0.8rem',
-                              }}>
-                                {hotel.completed ? '✓ Completed' : '○ Pending Survey'}
-                              </Typography>
-                            </Box>
-                            <Box sx={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              backgroundColor: hotel.completed ? '#4caf50' : '#ff9800',
-                              ml: 2,
-                            }}>
-                              {hotel.completed ? (
-                                <CheckCircleOutlined sx={{ color: 'white', fontSize: 20 }} />
-                              ) : (
-                                <PendingOutlined sx={{ color: 'white', fontSize: 20 }} />
-                              )}
-                            </Box>
-                          </Box>
-                          
-                          {hotel.completed && (
-                            <Box sx={{ 
-                              mt: 2, 
-                              p: 1.5, 
-                              borderRadius: 1, 
-                              bgcolor: 'rgba(76, 175, 80, 0.1)',
-                            }}>
-                              <Typography variant="body2" sx={{ 
-                                color: '#4caf50', 
-                                fontWeight: 500,
-                                fontSize: '0.75rem',
-                                textAlign: 'center',
-                              }}>
-                                Survey submitted successfully
-                              </Typography>
-                            </Box>
-                          )}
-                        </CardContent>
-                        
-                        <CardActions sx={{ p: 3, pt: 0 }}>
-                          <Button 
-                            size="medium" 
-                            variant={hotel.completed ? "outlined" : "contained"}
-                            onClick={() => handleHotelClick(hotel)}
-                            fullWidth
-                            disabled={loading}
-                            sx={{
-                              borderRadius: 1,
-                              py: 1,
-                              fontWeight: 600,
-                              fontSize: '0.8rem',
-                              textTransform: 'none',
-                              ...(hotel.completed ? {
-                                borderColor: '#4caf50',
-                                color: '#4caf50',
-                                '&:hover': {
-                                  borderColor: '#43a047',
-                                  backgroundColor: 'rgba(76, 175, 80, 0.05)',
-                                },
-                              } : {
-                                backgroundColor: '#344767',
-                                '&:hover': {
-                                  backgroundColor: '#2d3748',
-                                },
-                              }),
-                            }}
-                          >
-                            {hotel.completed ? 'View Survey' : 'Start Survey'}
-                          </Button>
-                        </CardActions>
-                      </Card>
-                    </Grid>
-                  ))}
+                <Grid container spacing={{ xs: 2, sm: 3 }}>
+
+               {userHotels.map((hotel, index) => {
+  const isAlreadySubmitted = submittedHotels.includes(hotel.name);
+
+  return (
+   <Grid item xs={12} sm={6} md={4} lg={3} key = {index}>
+
+      <Card
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 2,
+          border: isAlreadySubmitted
+            ? '1px solid #9e9e9e'
+            : hotel.completed
+            ? '1px solid #4caf50'
+            : '1px solid #e0e0e0',
+          opacity: isAlreadySubmitted ? 0.6 : 1,
+          pointerEvents: isAlreadySubmitted ? 'none' : 'auto',
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': !isAlreadySubmitted && {
+            transform: 'translateY(-4px)',
+            boxShadow: '0rem 0.25rem 1rem rgba(0, 0, 0, 0.1)',
+          }
+        }}
+      >
+        <CardContent sx={{ flexGrow: 1, p: 3 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h6" component="h2" sx={{ color: '#344767', fontWeight: 600, mb: 1 }}>
+                {hotel.name}
+              </Typography>
+              <Typography variant="body2" sx={{
+                color: isAlreadySubmitted
+                  ? '#9e9e9e'
+                  : hotel.completed
+                  ? '#4caf50'
+                  : '#67748e',
+                fontWeight: 500,
+                fontSize: '0.8rem'
+              }}>
+                {isAlreadySubmitted
+                  ? 'Already Submitted'
+                  : hotel.completed
+                  ? '✓ Completed'
+                  : ' Pending Survey'}
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+
+        <CardActions sx={{ p: 3, pt: 0 }}>
+    <Button
+  size="medium"
+  variant={hotel.completed ? "outlined" : "contained"}
+  onClick={() => handleHotelClick(hotel)}
+  fullWidth
+  disabled={isAlreadySubmitted || loading}
+  sx={{
+    borderRadius: 2,
+    py: 1,
+    fontWeight: 600,
+    fontSize: '0.85rem',
+    textTransform: 'none',
+    backgroundColor: isAlreadySubmitted
+      ? '#b0b0b0' // soft grey for submitted
+      : hotel.completed
+      ? '#e3f2fd' // light blue for view survey
+      : '#4cafef', // soft primary for active survey
+    color: isAlreadySubmitted
+      ? '#fff'
+      : hotel.completed
+      ? '#1976d2'
+      : '#fff',
+    boxShadow: isAlreadySubmitted ? 'none' : '0px 2px 6px rgba(0,0,0,0.2)',
+    '&:hover': isAlreadySubmitted
+      ? {}
+      : hotel.completed
+      ? { backgroundColor: '#bbdefb' }
+      : { backgroundColor: '#3a9ad9' }
+  }}
+>
+  {isAlreadySubmitted
+    ? 'Survey Submitted'
+    : hotel.completed
+    ? 'View Survey'
+    : 'Start Survey'}
+</Button>
+
+        </CardActions>
+      </Card>
+    </Grid>
+  );
+})}
+
                 </Grid>
       </Container>
 
