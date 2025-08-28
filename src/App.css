@@ -5,33 +5,16 @@
   min-height: 100vh;
 }
 
-/* Fix for production router outlet issues */
-ion-router-outlet {
-  position: relative;
-  z-index: 1;
+.App {
+  text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 25%, #ffffff 50%, #f1f3f4 75%, #ffffff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
-/* Remove aria-hidden to prevent focus issues */
-ion-router-outlet[aria-hidden] {
-  display: block !important;
-  visibility: visible !important;
-}
-
-/* Ensure proper focus management */
-ion-router-outlet > * {
-  outline: none;
-}
-
-/* Fix for blank screen in production */
-.ion-page {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Mobile hamburger menu styles with higher specificity */
-ion-buttons.mobile-menu-button,
+/* Simplified mobile hamburger menu styles */
 .mobile-menu-button {
-  display: none !important;
+  display: none;
 }
 
 .mobile-menu-popover {
@@ -39,26 +22,23 @@ ion-buttons.mobile-menu-button,
 }
 
 .desktop-only {
-  display: block !important;
+  display: block;
 }
 
 .mobile-only {
-  display: none !important;
+  display: none;
 }
 
 /* Desktop buttons - show by default */
-ion-buttons.desktop-buttons,
 .desktop-buttons {
-  display: flex !important;
+  display: flex;
 }
 
 @media screen and (max-width: 768px) {
-  ion-buttons.mobile-menu-button,
   .mobile-menu-button {
     display: flex !important;
   }
   
-  ion-buttons.desktop-buttons,
   .desktop-buttons {
     display: none !important;
   }
@@ -69,34 +49,6 @@ ion-buttons.desktop-buttons,
   
   .mobile-only {
     display: block !important;
-  }
-}
-
-/* Additional mobile-specific overrides for smaller screens */
-@media screen and (max-width: 480px) {
-  ion-buttons.mobile-menu-button,
-  .mobile-menu-button {
-    display: flex !important;
-  }
-  
-  ion-buttons.desktop-buttons,
-  .desktop-buttons {
-    display: none !important;
-  }
-}
-
-/* Force visibility rules for Ionic components */
-@media screen and (min-width: 769px) {
-  ion-buttons.mobile-menu-button,
-  .mobile-menu-button {
-    display: none !important;
-    visibility: hidden !important;
-  }
-  
-  ion-buttons.desktop-buttons,
-  .desktop-buttons {
-    display: flex !important;
-    visibility: visible !important;
   }
 }
 

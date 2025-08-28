@@ -18,8 +18,6 @@ import {
   IonSelectOption,
   IonInput,
   IonSpinner,
-  IonRefresher,
-  IonRefresherContent,
   IonModal,
   IonIcon,
   IonText,
@@ -355,12 +353,6 @@ const AdminPanelIonic = () => {
     });
   };
 
-  const doRefresh = (event) => {
-    loadSurveys().then(() => {
-      event.detail.complete();
-    });
-  };
-
   // Calculate statistics for new survey schema
   const totalSurveys = surveys.length;
   const acHotels = surveys.filter(s => s.acNonAc === 'AC').length;
@@ -416,37 +408,39 @@ const AdminPanelIonic = () => {
   }
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Survey Dashboard</IonTitle>
-          <IonButtons slot="end">
-            <IonButton fill="clear" onClick={() => setShowFilters(true)}>
-              <IonIcon icon={funnel} />
-            </IonButton>
-            <IonButton fill="clear" onClick={loadSurveys}>
-              <IonIcon icon={refresh} />
-            </IonButton>
-            <IonButton fill="clear" onClick={performHealthCheck}>
-              <IonIcon icon={heart} />
-            </IonButton>
-            <IonButton fill="clear" onClick={() => handleExport('json')}>
-              <IonIcon icon={download} />
-              JSON
-            </IonButton>
-            <IonButton fill="clear" onClick={() => handleExport('csv')}>
-              <IonIcon icon={download} />
-              CSV
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
+    <>
+      {/* Survey Dashboard Controls */}
+      <div style={{ padding: '16px', background: '#f8f9fa', borderBottom: '1px solid #dee2e6' }}>
+        <IonGrid>
+          <IonRow className="ion-align-items-center">
+            <IonCol>
+              <h2 style={{ margin: 0, color: '#2c3e50' }}>Survey Dashboard</h2>
+            </IonCol>
+            <IonCol size="auto">
+              <IonButton fill="clear" onClick={() => setShowFilters(true)}>
+                <IonIcon icon={funnel} />
+              </IonButton>
+              <IonButton fill="clear" onClick={loadSurveys}>
+                <IonIcon icon={refresh} />
+              </IonButton>
+              <IonButton fill="clear" onClick={performHealthCheck}>
+                <IonIcon icon={heart} />
+              </IonButton>
+              <IonButton fill="clear" onClick={() => handleExport('json')}>
+                <IonIcon icon={download} />
+                JSON
+              </IonButton>
+              <IonButton fill="clear" onClick={() => handleExport('csv')}>
+                <IonIcon icon={download} />
+                CSV
+              </IonButton>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
+      </div>
 
-      <IonContent>
-        <IonRefresher slot="fixed" onIonRefresh={doRefresh}>
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
-
+      {/* Content */}
+      <div style={{ padding: '16px' }}>
         {error && (
           <IonCard color="danger">
             <IonCardContent>
@@ -828,8 +822,8 @@ const AdminPanelIonic = () => {
             }
           ]}
         />
-      </IonContent>
-    </IonPage>
+      </div>
+    </>
   );
 };
 

@@ -9,17 +9,11 @@ import { initializeAuth, logout } from './store/authSlice';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import AdminScreen from './components/AdminScreen';
-import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
-// Initialize Ionic with production-friendly settings
-setupIonicReact({
-  mode: 'ios', // Force iOS mode for consistency
-  swipeBackEnabled: false,
-  rippleEffect: false
-});
+// Initialize Ionic
+setupIonicReact();
 
-// App Router Component
 function AppRouter() {
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -28,27 +22,6 @@ function AppRouter() {
     // Initialize auth state from localStorage on app start
     dispatch(initializeAuth());
   }, [dispatch]);
-
-  // Fix for production aria-hidden issue
-  useEffect(() => {
-    const fixAriaHidden = () => {
-      const routerOutlets = document.querySelectorAll('ion-router-outlet[aria-hidden="true"]');
-      routerOutlets.forEach(outlet => {
-        outlet.removeAttribute('aria-hidden');
-      });
-    };
-
-    // Run immediately and also after navigation
-    fixAriaHidden();
-    const interval = setInterval(fixAriaHidden, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Debug: Log authentication state changes
-  useEffect(() => {
-    console.log('Authentication state changed:', { isAuthenticated, user: user?.username });
-  }, [isAuthenticated, user]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -97,13 +70,10 @@ function AppRouter() {
   );
 }
 
-// Main App Component with Redux Provider
 function App() {
   return (
     <Provider store={store}>
-      <ErrorBoundary>
-        <AppRouter />
-      </ErrorBoundary>
+      <AppRouter />
     </Provider>
   );
 }
