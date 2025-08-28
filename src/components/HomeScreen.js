@@ -94,6 +94,9 @@ const HomeScreen = ({ user, onLogout }) => {
   // Toast notifications
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  
+  // Responsive state for mobile detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const isAdmin = user?.role === 'admin';
 
@@ -117,6 +120,16 @@ const HomeScreen = ({ user, onLogout }) => {
       dispatch(fetchSurveyedHotels());
     }
   }, [user, dispatch]);
+
+  // Handle window resize for responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleHotelClick = (hotel) => {
     setSelectedHotel(hotel);
@@ -292,7 +305,13 @@ const HomeScreen = ({ user, onLogout }) => {
           <IonTitle>Hotel Survey Dashboard</IonTitle>
           
           {/* Desktop buttons */}
-          <IonButtons slot="end" className="desktop-buttons">
+          <IonButtons 
+            slot="end" 
+            className="desktop-buttons"
+            style={{ 
+              display: !isMobile ? 'flex' : 'none'
+            }}
+          >
             <IonButton fill="outline" onClick={refreshUserHotels}>
               <IonIcon icon={refreshOutline} slot="start" />
               Refresh
@@ -317,7 +336,13 @@ const HomeScreen = ({ user, onLogout }) => {
           </IonButtons>
 
           {/* Mobile hamburger menu */}
-          <IonButtons slot="end" className="mobile-menu-button">
+          <IonButtons 
+            slot="end" 
+            className="mobile-menu-button"
+            style={{ 
+              display: isMobile ? 'flex' : 'none'
+            }}
+          >
             <IonButton id="mobile-menu-trigger" fill="clear">
               <IonIcon icon={menuOutline} />
             </IonButton>
@@ -413,7 +438,13 @@ const HomeScreen = ({ user, onLogout }) => {
         </IonCard>
 
         {/* Search and Filter Controls */}
-        <IonCard style={{ margin: '16px', display: 'block' }} className="desktop-only">
+        <IonCard 
+          style={{ 
+            margin: '16px', 
+            display: !isMobile ? 'block' : 'none' 
+          }} 
+          className="desktop-only"
+        >
           <IonCardContent style={{ padding: '12px' }}>
             <IonGrid>
               <IonRow style={{ alignItems: 'center' }}>
@@ -455,7 +486,13 @@ const HomeScreen = ({ user, onLogout }) => {
         </IonCard>
 
         {/* KPIs Section */}
-        <IonGrid style={{ padding: '0 16px' }} className="desktop-only">
+        <IonGrid 
+          style={{ 
+            padding: '0 16px',
+            display: !isMobile ? 'block' : 'none'
+          }} 
+          className="desktop-only"
+        >
           <IonRow>
             <IonCol size="12" sizeSm="6" sizeLg="3">
               <IonCard>

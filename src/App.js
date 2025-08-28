@@ -9,10 +9,15 @@ import { initializeAuth, logout } from './store/authSlice';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import AdminScreen from './components/AdminScreen';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
-// Initialize Ionic
-setupIonicReact();
+// Initialize Ionic with production-friendly settings
+setupIonicReact({
+  mode: 'ios', // Force iOS mode for consistency
+  swipeBackEnabled: false,
+  rippleEffect: false
+});
 
 // App Router Component
 function AppRouter() {
@@ -23,6 +28,22 @@ function AppRouter() {
     // Initialize auth state from localStorage on app start
     dispatch(initializeAuth());
   }, [dispatch]);
+
+  // Fix for production aria-hidden issue
+  useEffect(() => {
+    const fixAriaHidden = () => {
+      const routerOutlets = document.querySelectorAll('ion-router-outlet[aria-hidden="true"]');
+      routerOutlets.forEach(outlet => {
+        outlet.removeAttribute('aria-hidden');
+      });
+    };
+
+    // Run immediately and also after navigation
+    fixAriaHidden();
+    const interval = setInterval(fixAriaHidden, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Debug: Log authentication state changes
   useEffect(() => {
@@ -37,7 +58,7 @@ function AppRouter() {
   return (
     <IonApp>
       <IonReactRouter>
-        <IonRouterOutlet>
+        <IonRouterOutlet id="main">
           <Route 
             exact 
             path="/login" 
@@ -80,7 +101,9 @@ function AppRouter() {
 function App() {
   return (
     <Provider store={store}>
-      <AppRouter />
+      <ErrorBoundary>
+        <AppRouter />
+      </ErrorBoundary>
     </Provider>
   );
 }

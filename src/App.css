@@ -5,9 +5,33 @@
   min-height: 100vh;
 }
 
-/* Mobile hamburger menu styles */
+/* Fix for production router outlet issues */
+ion-router-outlet {
+  position: relative;
+  z-index: 1;
+}
+
+/* Remove aria-hidden to prevent focus issues */
+ion-router-outlet[aria-hidden] {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Ensure proper focus management */
+ion-router-outlet > * {
+  outline: none;
+}
+
+/* Fix for blank screen in production */
+.ion-page {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Mobile hamburger menu styles with higher specificity */
+ion-buttons.mobile-menu-button,
 .mobile-menu-button {
-  display: none;
+  display: none !important;
 }
 
 .mobile-menu-popover {
@@ -15,28 +39,64 @@
 }
 
 .desktop-only {
-  display: block;
+  display: block !important;
 }
 
 .mobile-only {
-  display: none;
+  display: none !important;
 }
 
-@media (max-width: 768px) {
+/* Desktop buttons - show by default */
+ion-buttons.desktop-buttons,
+.desktop-buttons {
+  display: flex !important;
+}
+
+@media screen and (max-width: 768px) {
+  ion-buttons.mobile-menu-button,
   .mobile-menu-button {
-    display: block;
+    display: flex !important;
   }
   
+  ion-buttons.desktop-buttons,
   .desktop-buttons {
-    display: none;
+    display: none !important;
   }
   
   .desktop-only {
-    display: none;
+    display: none !important;
   }
   
   .mobile-only {
-    display: block;
+    display: block !important;
+  }
+}
+
+/* Additional mobile-specific overrides for smaller screens */
+@media screen and (max-width: 480px) {
+  ion-buttons.mobile-menu-button,
+  .mobile-menu-button {
+    display: flex !important;
+  }
+  
+  ion-buttons.desktop-buttons,
+  .desktop-buttons {
+    display: none !important;
+  }
+}
+
+/* Force visibility rules for Ionic components */
+@media screen and (min-width: 769px) {
+  ion-buttons.mobile-menu-button,
+  .mobile-menu-button {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  ion-buttons.desktop-buttons,
+  .desktop-buttons {
+    display: flex !important;
+    visibility: visible !important;
   }
 }
 
