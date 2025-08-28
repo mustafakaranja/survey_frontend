@@ -132,3 +132,33 @@ ion-app {
     padding-right: 8px;
   }
 }
+
+/* Mobile search specific styles */
+.mobile-search-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.mobile-search-card:hover {
+  transform: translateY(-2px);
+}
+
+.mobile-filter-buttons {
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .mobile-filter-buttons {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .mobile-filter-buttons ion-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}

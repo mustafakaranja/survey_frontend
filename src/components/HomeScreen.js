@@ -547,6 +547,46 @@ const HomeScreen = ({ user, onLogout }) => {
           </IonRow>
         </IonGrid>
 
+        {/* Mobile Search and Filter Controls */}
+        <IonCard 
+          style={{ 
+            margin: '16px', 
+            display: isMobile ? 'block' : 'none' 
+          }} 
+          className="mobile-only mobile-search-card"
+        >
+          <IonCardContent style={{ padding: '16px' }}>
+            <IonSearchbar
+              value={hotelSearchTerm}
+              onIonInput={(e) => setHotelSearchTerm(e.detail.value)}
+              placeholder="Search hotels..."
+              showClearButton="focus"
+              style={{ marginBottom: '16px' }}
+            />
+            <div className="mobile-filter-buttons" style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+              <IonLabel style={{ fontSize: '0.9rem', marginRight: '8px', minWidth: 'fit-content' }}>Show:</IonLabel>
+              <IonButton
+                fill={showCompleted ? 'solid' : 'outline'}
+                color="success"
+                size="small"
+                onClick={() => setShowCompleted(!showCompleted)}
+              >
+                <IonIcon icon={checkmarkCircleOutline} slot="start" />
+                Completed
+              </IonButton>
+              <IonButton
+                fill={showPending ? 'solid' : 'outline'}
+                color="warning"
+                size="small"
+                onClick={() => setShowPending(!showPending)}
+              >
+                <IonIcon icon={timeOutline} slot="start" />
+                Pending
+              </IonButton>
+            </div>
+          </IonCardContent>
+        </IonCard>
+
         {/* Hotel List Section */}
         <div style={{ padding: '0 16px', marginTop: '24px' }}>
           <h2 style={{ color: 'var(--ion-color-primary)', marginBottom: '8px' }}>Assigned Hotels</h2>
