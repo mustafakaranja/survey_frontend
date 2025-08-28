@@ -753,10 +753,13 @@ const HomeScreen = ({ user, onLogout }) => {
                                     'N/A';
                   
                   const surveyedBy = survey.surveyedBy || 
-                                    survey.surveyed_by || 
-                                    survey.surveyData?.surveyedBy ||
-                                    survey.user?.name ||
-                                    'N/A';
+                   survey.surveyed_by || 
+                   survey.surveyData?.surveyedBy ||
+                   survey.username || 
+                   survey.surveyData?.username ||
+                   survey.user?.name ||
+                   'N/A';
+
                   
                   console.log('Rendering survey item:', { survey, hotelName, address, surveyDate, surveyedBy });
                   
