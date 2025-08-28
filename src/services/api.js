@@ -85,9 +85,13 @@ export const surveyAPI = {
   // Submit survey
   submitSurvey: async (surveyData) => {
     try {
+      console.log('Submitting survey data:', surveyData);
       const response = await api.post('/api/submitSurvey', surveyData);
+      console.log('Survey submission response:', response);
+      console.log('Survey submission response data:', response.data);
       return response.data;
     } catch (error) {
+      console.error('Survey submission API error:', error);
       throw new Error(error.response?.data?.message || 'Failed to submit survey');
     }
   },
@@ -116,10 +120,29 @@ export const surveyAPI = {
   // Get all surveys (Admin only)
   getAllSurveys: async () => {
     try {
+      console.log('Making API call to /api/surveys');
+      const response = await api.get('/api/surveys');
+      console.log('API Response status:', response.status);
+      console.log('API Response data structure:', Object.keys(response.data || {}));
+      return response.data;
+    } catch (error) {
+      console.error('getAllSurveys API Error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      throw new Error(error.response?.data?.message || 'Failed to get all surveys');
+    }
+  },
+
+  // Get surveys for current user
+  getSurveys: async () => {
+    try {
       const response = await api.get('/api/surveys');
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to get all surveys');
+      throw new Error(error.response?.data?.message || 'Failed to get surveys');
     }
   },
 
@@ -180,6 +203,27 @@ export const handleAPIError = (error) => {
   }
   
   return error.message || 'An unexpected error occurred.';
+};
+
+// Add a health check method for debugging production issues
+export const healthCheck = async () => {
+  try {
+    console.log('Performing health check...');
+    const response = await api.get('/health');
+    console.log('Health check successful:', response.data);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error('Health check failed:', error);
+    return { 
+      success: false, 
+      error: error.response?.data?.message || error.message || 'Health check failed',
+      details: {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message
+      }
+    };
+  }
 };
 
 export default api;

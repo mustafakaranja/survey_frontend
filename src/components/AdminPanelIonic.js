@@ -38,6 +38,7 @@ import {
   download,
   analytics,
   business,
+  heart,
   close,
   location,
   snow,
@@ -52,7 +53,7 @@ import {
   restaurant,
   checkmark
 } from 'ionicons/icons';
-import { surveyAPI, handleAPIError } from '../services/api';
+import { surveyAPI, handleAPIError, healthCheck } from '../services/api';
 
 const AdminPanelIonic = () => {
   const [surveys, setSurveys] = useState([]);
@@ -67,7 +68,7 @@ const AdminPanelIonic = () => {
   const [filters, setFilters] = useState({
     search: '',
     acNonAc: '',
-    dormitory: '',
+    visitingCard: '',
     breakfast: '',
     roomsMin: '',
     roomsMax: '',
@@ -101,10 +102,10 @@ const AdminPanelIonic = () => {
       filtered = filtered.filter(survey => survey.acNonAc === filters.acNonAc);
     }
 
-    // Dormitory filter
-    if (filters.dormitory !== '') {
-      const dormitoryFilter = filters.dormitory === 'true';
-      filtered = filtered.filter(survey => survey.dormitory === dormitoryFilter);
+    // Visiting Card filter
+    if (filters.visitingCard !== '') {
+      const visitingCardFilter = filters.visitingCard === 'true';
+      filtered = filtered.filter(survey => survey.visitingCard === visitingCardFilter);
     }
 
     // Breakfast filter
@@ -162,11 +163,13 @@ const AdminPanelIonic = () => {
       // Handle different response structures
       let surveysData = [];
       
-      if (response.success && response.surveys) {
+      if (response && response.success && response.surveys) {
         surveysData = response.surveys;
-      } else if (Array.isArray(response)) {
+      } else if (response && Array.isArray(response)) {
         surveysData = response;
-      } else if (response.data && Array.isArray(response.data)) {
+      } else if (response && response.data && Array.isArray(response.data)) {
+        surveysData = response.data;
+      } else if (response && response.status === 'success' && response.data) {
         surveysData = response.data;
       } else {
         console.warn('Unexpected response structure:', response);
@@ -194,6 +197,8 @@ const AdminPanelIonic = () => {
           breakfast: survey.surveyData?.breakfast || survey.breakfast || false,
           numberOfRoomsOfferedDuringAdshsra: survey.surveyData?.numberOfRoomsOfferedDuringAdshsra || survey.numberOfRoomsOfferedDuringAdshsra || 'N/A',
           comments: survey.surveyData?.comments || survey.comments || 'N/A',
+          visitingCard: survey.surveyData?.visitingCard || survey.visitingCard || false,
+          numberOfGuests: survey.surveyData?.numberOfGuests || survey.numberOfGuests || 0,
           createdAt: survey.submittedAt || survey.createdAt || survey.created_at || new Date().toISOString(),
           updatedAt: survey.submittedAt || survey.updatedAt || survey.updated_at || new Date().toISOString()
         };
@@ -210,6 +215,27 @@ const AdminPanelIonic = () => {
     }
   };
 
+  const performHealthCheck = async () => {
+    try {
+      setLoading(true);
+      console.log('Performing health check...');
+      const result = await healthCheck();
+      
+      if (result.success) {
+        setError('');
+        alert('Health Check Passed! API is responding correctly.');
+      } else {
+        setError(`Health Check Failed: ${result.error}`);
+        console.error('Health check details:', result.details);
+      }
+    } catch (err) {
+      console.error('Health check error:', err);
+      setError(`Health Check Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
   };
@@ -218,7 +244,7 @@ const AdminPanelIonic = () => {
     setFilters({
       search: '',
       acNonAc: '',
-      dormitory: '',
+      visitingCard: '',
       breakfast: '',
       roomsMin: '',
       roomsMax: '',
@@ -283,8 +309,8 @@ const AdminPanelIonic = () => {
   const exportToCSV = () => {
     const headers = [
       'Hotel Name', 'Address', 'Manager Email', 'Contact Number', 'WhatsApp', 
-      'AC/Non-AC', 'Dormitory', 'Total Rooms', 'Room Tariff', 'Breakfast', 
-      'Rooms for Adshsra', 'Comments', 'Surveyed By', 'Date'
+      'AC/Non-AC', 'Total Rooms', 'Room Tariff', 'Breakfast', 
+      'Rooms for Adshsra', 'Visiting Card Collected', 'Number of Guests', 'Comments', 'Surveyed By', 'Date'
     ];
     
     const csvContent = [
@@ -296,11 +322,12 @@ const AdminPanelIonic = () => {
         `"${survey.managerContactNumber}"`,
         `"${survey.whatsappNumber}"`,
         `"${survey.acNonAc}"`,
-        survey.dormitory ? 'Yes' : 'No',
         survey.numberOfRoomsInHotel,
         `"${survey.roomTariff}"`,
         survey.breakfast ? 'Yes' : 'No',
         `"${survey.numberOfRoomsOfferedDuringAdshsra}"`,
+        survey.visitingCard ? 'Yes' : 'No',
+        survey.numberOfGuests,
         `"${survey.comments}"`,
         `"${survey.username}"`,
         `"${formatDate(survey.createdAt)}"`
@@ -337,7 +364,7 @@ const AdminPanelIonic = () => {
   // Calculate statistics for new survey schema
   const totalSurveys = surveys.length;
   const acHotels = surveys.filter(s => s.acNonAc === 'AC').length;
-  const dormitoryHotels = surveys.filter(s => s.dormitory === true).length;
+  const totalGuests = surveys.reduce((sum, s) => sum + parseInt(s.numberOfGuests || 0), 0);
   const totalRooms = surveys.reduce((sum, s) => sum + parseInt(s.numberOfRoomsInHotel || 0), 0);
 
   if (loading) {
@@ -358,6 +385,36 @@ const AdminPanelIonic = () => {
     );
   }
 
+  // Add error state UI
+  if (error && surveys.length === 0) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Admin Panel - Error</IonTitle>
+            <IonButtons slot="end">
+              <IonButton fill="clear" onClick={loadSurveys}>
+                <IonIcon icon={refresh} />
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-text-center ion-padding">
+          <IonIcon icon={analytics} style={{ fontSize: '4rem', color: 'var(--ion-color-danger)' }} />
+          <IonText color="danger">
+            <h2>Error Loading Data</h2>
+            <p>{error}</p>
+            <p>Please check your internet connection and try again.</p>
+          </IonText>
+          <IonButton onClick={loadSurveys} expand="block" color="primary" style={{ marginTop: '20px' }}>
+            <IonIcon icon={refresh} slot="start" />
+            Retry Loading
+          </IonButton>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
   return (
     <IonPage>
       <IonHeader>
@@ -369,6 +426,9 @@ const AdminPanelIonic = () => {
             </IonButton>
             <IonButton fill="clear" onClick={loadSurveys}>
               <IonIcon icon={refresh} />
+            </IonButton>
+            <IonButton fill="clear" onClick={performHealthCheck}>
+              <IonIcon icon={heart} />
             </IonButton>
             <IonButton fill="clear" onClick={() => handleExport('json')}>
               <IonIcon icon={download} />
@@ -425,10 +485,10 @@ const AdminPanelIonic = () => {
             <IonCol size="6" sizeMd="3">
               <IonCard>
                 <IonCardContent className="ion-text-center">
-                  <IonIcon icon={bed} size="large" color="tertiary" />
-                  <IonCardTitle>{dormitoryHotels}</IonCardTitle>
+                  <IonIcon icon={analytics} size="large" color="tertiary" />
+                  <IonCardTitle>{totalGuests}</IonCardTitle>
                   <IonText color="medium">
-                    <p>Dormitory Hotels</p>
+                    <p>Total Guests</p>
                   </IonText>
                 </IonCardContent>
               </IonCard>
@@ -564,20 +624,24 @@ const AdminPanelIonic = () => {
                       <IonCol size="12" sizeMd="6">
                         <IonItem lines="none">
                           <IonLabel>
-                            <h3>Features</h3>
+                            <h3>Features & Additional Info</h3>
                             <div>
-                              {survey.dormitory && (
-                                <IonChip color="secondary">
-                                  <IonIcon icon={checkmark} />
-                                  <IonLabel>Dormitory</IonLabel>
-                                </IonChip>
-                              )}
                               {survey.breakfast && (
                                 <IonChip color="warning">
                                   <IonIcon icon={restaurant} />
                                   <IonLabel>Breakfast</IonLabel>
                                 </IonChip>
                               )}
+                              {survey.visitingCard && (
+                                <IonChip color="success">
+                                  <IonIcon icon={checkmark} />
+                                  <IonLabel>Visiting Card Collected</IonLabel>
+                                </IonChip>
+                              )}
+                              <IonChip color="primary">
+                                <IonIcon icon={analytics} />
+                                <IonLabel>{survey.numberOfGuests} Guests</IonLabel>
+                              </IonChip>
                             </div>
                           </IonLabel>
                         </IonItem>
@@ -647,10 +711,10 @@ const AdminPanelIonic = () => {
               </IonItem>
 
               <IonItem>
-                <IonLabel position="stacked">Dormitory</IonLabel>
+                <IonLabel position="stacked">Visiting Card Collected</IonLabel>
                 <IonSelect
-                  value={filters.dormitory}
-                  onSelectionChange={(e) => handleFilterChange('dormitory', e.detail.value)}
+                  value={filters.visitingCard}
+                  onSelectionChange={(e) => handleFilterChange('visitingCard', e.detail.value)}
                   placeholder="All"
                 >
                   <IonSelectOption value="">All</IonSelectOption>

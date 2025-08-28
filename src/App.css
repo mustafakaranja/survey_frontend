@@ -1,5 +1,43 @@
 .App {
   text-align: center;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 25%, #ffffff 50%, #f1f3f4 75%, #ffffff 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Mobile hamburger menu styles */
+.mobile-menu-button {
+  display: none;
+}
+
+.mobile-menu-popover {
+  --width: 280px;
+}
+
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-button {
+    display: block;
+  }
+  
+  .desktop-buttons {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
 }
 
 .App-logo {

@@ -33,7 +33,9 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
     roomTariff: '',
     breakfast: false,
     numberOfRoomsOfferedDuringAdshsra: '',
-    comments: ''
+    comments: '',
+    visitingCard: false,
+    numberOfGuests: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -111,7 +113,8 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
       // Validate required fields
       if (!surveyData.hotelName || !surveyData.address || !surveyData.managerEmail || 
           !surveyData.managerContactNumber || !surveyData.whatsappNumber || !surveyData.acNonAc ||
-          !surveyData.numberOfRoomsInHotel || !surveyData.roomTariff || !surveyData.numberOfRoomsOfferedDuringAdshsra) {
+          !surveyData.numberOfRoomsInHotel || !surveyData.roomTariff || !surveyData.numberOfRoomsOfferedDuringAdshsra ||
+          !surveyData.numberOfGuests) {
         console.log('Validation failed. Missing fields:');
         console.log('Hotel Name:', surveyData.hotelName);
         console.log('Address:', surveyData.address);
@@ -122,6 +125,7 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
         console.log('Number of Rooms in Hotel:', surveyData.numberOfRoomsInHotel);
         console.log('Room Tariff:', surveyData.roomTariff);
         console.log('Rooms Offered During Adshsra:', surveyData.numberOfRoomsOfferedDuringAdshsra);
+        console.log('Number of Guests:', surveyData.numberOfGuests);
         throw new Error('Please fill in all required fields');
       }
 
@@ -152,7 +156,9 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
       roomTariff: '',
       breakfast: false,
       numberOfRoomsOfferedDuringAdshsra: '',
-      comments: ''
+      comments: '',
+      visitingCard: false,
+      numberOfGuests: ''
     });
   };
 
@@ -327,9 +333,37 @@ const HotelSurveyModal = ({ open, onClose, hotel, onSubmit, isCompleted }) => {
             <Grid item xs={12} sm={6}>
               <TextField
                 name="numberOfRoomsOfferedDuringAdshsra"
-                label="Number of Rooms Offered During Adshsra"
+                label="# Offered During Ashara"
                 type="number"
                 value={formData.numberOfRoomsOfferedDuringAdshsra}
+                onChange={handleChange}
+                fullWidth
+                required
+                inputProps={{ min: 0 }}
+                disabled={isCompleted}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="visitingCard"
+                    checked={formData.visitingCard}
+                    onChange={handleChange}
+                    disabled={isCompleted}
+                  />
+                }
+                label="Collected Visiting Card"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                name="numberOfGuests"
+                label="Number of Guests Accommodate"
+                type="number"
+                value={formData.numberOfGuests}
                 onChange={handleChange}
                 fullWidth
                 required
